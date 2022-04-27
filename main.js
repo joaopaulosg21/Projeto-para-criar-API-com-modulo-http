@@ -1,6 +1,7 @@
 const http = require('http');
 const Response = require('./response');
 const Request = require('./request');
+const fs = require('fs');
 
 class MyFramework {
 
@@ -40,7 +41,29 @@ class MyFramework {
         };
     };
 
+    arquivo(url,arquivo,callback){
+        if(typeof callback == "function"){
+            this.server.on('request',(req,res)=>{
+                if(req.url == url && req.method == "GET"){
+                    if(arquivo.endsWith('.html')){
+                        const request = new Request(req);
+                        const response = new Response(res);
+                        fs.readFile(arquivo,(err,data)=>{
+                            if(err){
+                                console.log({error:err})
+                            }else{
+                                callback(request.header(),response,data)
+                            }
+                        });
+                    }else{
+                        console.log({error:'Somente arquivos HTML'})
+                    }
 
+                }
+            })
+        }
+
+    }
 
 
 }
