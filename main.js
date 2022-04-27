@@ -1,4 +1,6 @@
 const http = require('http');
+const Response = require('./response');
+const Request = require('./request');
 
 class MyFramework {
 
@@ -17,7 +19,8 @@ class MyFramework {
         if(typeof callback == "function"){
             this.server.on('request',(req,res)=>{
                 if(req.url == url && req.method == "GET"){
-                    callback(req,res)
+                    const response = new Response(res)
+                    callback(req,response)
                 }
             })
         }
@@ -28,28 +31,16 @@ class MyFramework {
             this.server.on('request',(req,res)=>{
                 if(req.url == url && req.method == "POST"){
                     req.on('data',(data)=>{
-                        const Request = {
-                            body:JSON.parse(data.toString())
-                        }
-                        const Response = {
-                            status(code){
-                                res.writeHead(code)
-                            },
-                            escrever(value){
-                                res.end(value)
-                            },
-                            json(value){
-                                if(typeof value == "object"){
-                                    res.end(JSON.stringify(value))
-                                }
-                            }
-                        }
-                        callback(Request,Response)
-                    })
-                }
-            })
-        }
-    }
+                        const request = new Request(req);
+                        const response = new Response(res);
+                        callback(request.body(data),response)
+                    });
+                };
+            });
+        };
+    };
+
+
 
 
 }
